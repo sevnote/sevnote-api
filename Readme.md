@@ -1,6 +1,9 @@
 SEVNOTE API api.sevnote.com
 ===========================
 
-#Please Vistit
+#start
+npm start
+
+#website
 http://www.sevnote.com
 

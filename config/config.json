@@ -1,0 +1,38 @@
+{
+    "development": {
+        "app_port": 3400,
+        "api_version":"V1",
+        "service": "http://api.sevnote.com",
+        "api_domain": "http://127.0.0.1:4500",
+        "redis_store": [{
+            "host": "127.0.0.1",
+            "port": 6379
+        }],
+        "mysql":[{
+            "server" : "localhost",
+            "username": "root",
+            "password": "",
+            "database": "sevnote"
+        }],
+        "custom_filter_path": "/data/sevnote/logstash/conf.d/",
+        "logstash_pattern_path": "/data/sevnote/logstash/etc/patterns/"
+    },
+    "production": {
+        "app_port": 3500,
+        "api_version":"V1",
+        "service": "http://api.sevnote.com",
+        "api_domain": "http://127.0.0.1:4500",
+        "redis_store": [{
+            "host": "127.0.0.1",
+            "port": 6379
+        }], 
+        "mysql": [{
+            "server": "localhost",
+            "username": "root",
+            "password": "",
+            "database": "sevnote"
+        }],
+        "custom_filter_path": "/data/sevnote/logstash/conf.d/",
+        "logstash_pattern_path": "/data/sevnote/logstash/etc/patterns/"
+    }
+}

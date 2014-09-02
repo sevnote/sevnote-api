@@ -1,0 +1,6 @@
+{
+    "360安全浏览器": ".+QIHU\\s360SE$",
+    "Firefox": "^Mozilla.+Gecko.+Firefox\\/([0-9\\.]+)$",
+    "IE11": "^Mozilla.+like\\sGecko$",
+    "Chrome": "^Mozilla.+AppleWebKit.+Chrome.+Safari\\/[0-9\\.]+$"
+}

@@ -13,7 +13,6 @@ var express = require('express'),
 app.post('/' + Method, base.Connect(),function(req, res) {
 
     //Require
-    var userid = req.UserId;
     var type = req.body.Type;
     if (!type) {
         res.json(common.fail(-1, Method, 'Missing parameter: Type'));
@@ -22,13 +21,13 @@ app.post('/' + Method, base.Connect(),function(req, res) {
 
     //Optional
     var index = undefined === req.body.Index
-              ? 'user-' + userid + '-*'
+              ? '_all'
               : req.body.Index;
 
     var result = es.getMapping(index, type);
     result = result[Object.keys(result)[0]].mappings[type].properties;
     //去除带'@'的field
-    var blist = ['@timestamp', '@version', 'type', 'message', 'tags', 'timestamp', 'uuid', 'user_id'];
+    var blist = ['@timestamp', '@version', 'type', 'message', 'tags', 'timestamp', 'uuid'];
     for (var field in result) {
         if (blist.indexOf(field) >= 0) {
             delete result[field];

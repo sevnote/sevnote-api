@@ -15,12 +15,7 @@ var express = require('express'),
 app.post('/' + Method, base.Connect(),function(req, res) {
 
     //Require
-    var userid = req.UserId;
     var type = req.body.Type;
-    if (!userid) {
-        res.json(common.fail(-1, Method, 'Missing parameter: UserId'));
-        return;
-    }
     
     //Optional
     type = undefined === type
@@ -44,7 +39,6 @@ app.post('/' + Method, base.Connect(),function(req, res) {
 
     //快速过滤
     var filters = [];
-    filters.push({key:'user_id', value:'"' + userid + '"'});
     if (req.body.Filter) {
         console.log(req.body.Filter);
         var f = JSON.parse(req.body.Filter);
@@ -64,7 +58,8 @@ app.post('/' + Method, base.Connect(),function(req, res) {
             ejs.QueryStringQuery(key),
             esFilters);
     var params = {
-        index: 'user-' + userid + '-*',
+        //index: 'user-' + userid + '-*',
+        index: '_all',
         type: type,
         body: ejs.Request().query(searchQuery).sort('@timestamp', 'desc'),
         from: offset,
@@ -85,7 +80,7 @@ app.post('/' + Method, base.Connect(),function(req, res) {
 
     //分类统计
     var agg = ejs.FilterAggregation('classcount');
-    var fields = getFields(type, userid);
+    var fields = getFields(type);
     if (fields) {
         for (var i in fields) {
             if (fields[i] != 'host') {
@@ -146,15 +141,16 @@ app.post('/' + Method, base.Connect(),function(req, res) {
     ));
 });
 
-function getFields(type, userid){
+function getFields(type){
     if (!type) {
         return false;
     }   
-    var index = 'user-' + userid + '-*';
+    //var index = 'user-' + userid + '-*';
+    var index = '_all';
     var result = es.getMapping(index, type);
     result = result[Object.keys(result)[0]].mappings[type].properties;
     //去除带'@'的field
-    var blist = ['@timestamp', '@version', 'type', 'message', 'tags', 'timestamp', 'uuid', 'user_id'];
+    var blist = ['@timestamp', '@version', 'type', 'message', 'tags', 'timestamp', 'uuid'];
     for (var field in result) {
         if (blist.indexOf(field) >= 0) {
             delete result[field];

@@ -12,13 +12,6 @@ var express = require('express'),
 
 app.post('/' + Method, base.Connect(),function(req, res) {
 
-    //Require
-    var userid = req.UserId;
-    if (!userid) {
-        res.json(common.fail(-1, Method, 'Missing parameter: UserId'));
-        return;
-    }
-
     var filename = req.body.FileName;
     if (!filename) {
         res.json(common.fail(-1, Method, 'Missing parameter: FileName'));

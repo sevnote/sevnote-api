@@ -13,11 +13,6 @@ var express = require('express'),
 app.post('/' + Method, base.Connect(),function(req, res) {
 
     //Require
-    var userid = req.UserId;
-    if (!userid) {
-        res.json(common.fail(-1, Method, 'Missing parameter: UserId'));
-        return;
-    }
 
     //Optional
     var type = req.body.Type
@@ -51,9 +46,7 @@ app.post('/' + Method, base.Connect(),function(req, res) {
     }
     console.log(from, to);
 
-    //用户过滤
     var filters = [];
-    filters.push({key:'user_id', value:'"' + userid + '"'});
     //Host过滤
     if (host != '*') {
         filters.push({key:'host', value:'"' + host + '"'});
@@ -69,7 +62,8 @@ app.post('/' + Method, base.Connect(),function(req, res) {
             ejs.QueryStringQuery(key),
             esFilters);
     var searchParams = {
-        index: 'user-' + userid + '-*',
+        //index: 'user-' + userid + '-*',
+        index: '_all',
         type: type?type:null,
         body: ejs.Request().query(searchQuery).sort('@timestamp', 'desc'),
         size: 100
@@ -82,7 +76,8 @@ app.post('/' + Method, base.Connect(),function(req, res) {
     agg.agg(ejs.DateHistogramAggregation('histogram').field('@timestamp').interval(interval));
     agg.filter(ejs.QueryFilter(searchQuery));
     var aggParams = {
-        index: 'user-' + userid + '-*',
+        //index: 'user-' + userid + '-*',
+        index: '_all',
         type: type?type:null,
         body: ejs.Request().agg(agg),
         size: 0

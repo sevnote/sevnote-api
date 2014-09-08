@@ -15,20 +15,15 @@ var express = require('express'),
 
 app.post('/' + Method, base.Connect(),function(req, res) {
     //Require
-    var userid = req.UserId;
-    if (!userid) {
-        res.json(common.fail(-1, Method, 'Missing parameter: UserId'));
-        return;
-    }
     var name = req.body.Name;
     if (!name) {
         res.json(common.fail(-1, Method, 'Missing parameter: Name'));
         return;
     }
-    console.log('userid',userid,'name',name);
+    console.log('name',name);
 
     var result = null;
-    result = mysql.delete('snapshot', {'user_id':userid, 'name':name});
+    result = mysql.delete('snapshot', {'name':name});
     console.log(result);
     if (result.affectedRows != 0) {
         res.json(common.succeed(Method, {}));

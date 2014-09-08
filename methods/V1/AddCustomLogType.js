@@ -24,32 +24,25 @@ var GLOBAL_PATTERN_FILE_NAME = 'basic';
 app.post('/' + Method, base.Connect(),function(req, res) {
 
     //Require
-    var userid = req.UserId;
-    if (!userid) {
-        res.json(common.fail(-1, Method, 'Missing parameter: UserId'));
-        return;
-    }
     var type = req.body.Type;
     if (!type) {
         res.json(common.fail(-1, Method, 'Missing parameter: Type'));
         return;
     }
-    type = userid + '_' + type;
     var patternName = req.body.PatternName;
     if (!patternName) {
         res.json(common.fail(-1, Method, 'Missing parameter: PatternName'));
         return;
     }
-    patternName = userid + '_' + patternName;
     var patternExp = req.body.PatternExp;
     if (!patternExp) {
         res.json(common.fail(-1, Method, 'Missing parameter: PatternExp'));
         return;
     }
-    console.log('userid',userid,'type',type,'pattername',patternName,'patternexp',patternExp);
+    console.log('type',type,'pattername',patternName,'patternexp',patternExp);
 
     var result = null;
-    result = mysql.get_where_in('custom_logtype', {'user_id':userid});
+    result = mysql.get('custom_logtype');
     console.log(result);
     for (var i in result) {
         if (result[i].type == type) {
@@ -60,7 +53,7 @@ app.post('/' + Method, base.Connect(),function(req, res) {
             return;
         }
     }
-    result = addCustomPattern(patternName, patternExp, userid);
+    result = addCustomPattern(patternName, patternExp);
     if (result.success) {
         console.log('add custom pattern succeeded.');
     } else {
@@ -68,7 +61,7 @@ app.post('/' + Method, base.Connect(),function(req, res) {
         res.json(common.fail(-2, Method, result.error));
         return;
     }
-    result = addCustomFilter(type, patternName, userid);
+    result = addCustomFilter(type, patternName);
     if (result.success) {
         console.log('add custom filter succeeded.');
     } else {
@@ -81,12 +74,12 @@ app.post('/' + Method, base.Connect(),function(req, res) {
         fibers(function(){
             if (stdout.indexOf('Error') >=0) {
                 console.error('[error] logstash config checking failed.');
-                res.json(common.fail(-3, Method, 'logstash config checking failed. userid:', userid));
+                res.json(common.fail(-3, Method, 'logstash config checking failed. type:', type));
                 return;
             } else {
-                result = mysql.insert('custom_logtype', {'user_id':userid,'type':type,'pattern':patternName,'patternexp':patternExp});
+                result = mysql.insert('custom_logtype', {'type':type,'pattern':patternName,'patternexp':patternExp});
                 shell.exec('sudo /data/sevnote/logstash/bin/init reload').code;
-                console.log('[success] logstash config checking succeeded. userid:',userid);
+                console.log('[success] logstash config checking succeeded. type:', type);
                 res.json(common.succeed(Method, {}));
                 return;
             }   
@@ -94,11 +87,10 @@ app.post('/' + Method, base.Connect(),function(req, res) {
     }); 
 });
 
-function addCustomFilter(type, patternName, userId) {
-    //用户没有配置文件则添加一个空userId.conf文件
-    var filepath = getUserFilterFilePath(userId);
+function addCustomFilter(type, patternName) {
+    var filepath = getUserFilterFilePath();
     if (!fs.existsSync(filepath)) {
-        return {success:false, error:'user conf file does not exist.userid:' + userId};
+        return {success:false, error:'custom conf file does not exist.'};
     }
     var confstr = fs.readFileSync(filepath, {encoding:'utf8'});
     //console.log(confstr);
@@ -111,9 +103,9 @@ function addCustomFilter(type, patternName, userId) {
     
     //拼装grok过滤器
     var grokfilter = '';
-    grokfilter += 'tags => ["user_id_' + userid + '"]\n';
+    //grokfilter += 'tags => ["user_id_' + userid + '"]\n';
     grokfilter += 'overwrite => "message"\n';
-    grokfilter += 'patterns_dir => ["'+PATTERN_PATH+'0","' + PATTERN_PATH +  userId + '"]\n';
+    grokfilter += 'patterns_dir => ["'+PATTERN_PATH+'0","' + PATTERN_PATH +  '1' + '"]\n';
     grokfilter += 'match => ["message", "%{' + patternName + '}"]\n';
     grokfilter += 'add_tag => "' + type + '"\n';
     grokfilter += 'add_field => {"type" => "' + type + '"}\n';
@@ -129,19 +121,19 @@ function addCustomFilter(type, patternName, userId) {
     var err = fs.writeFileSync(filepath, confstr);
     if (err) {
         console.error('write', filepath, 'failed.');
-        return {success:false, error:'write custom config file failed. userid:' + userId};
+        return {success:false, error:'write custom config file failed.'};
     }
     return {success:true};
 }
 
-function addCustomPattern(patternName, patternExp, userId) {
+function addCustomPattern(patternName, patternExp) {
     //用户没有pattern文件则添加一个空custom文件
-    var filepath = getUserPatternFilePath(userId);
+    var filepath = getUserPatternFilePath();
     if (!fs.existsSync(filepath)) {
         fs.appendFileSync(filepath,'');
     }
     //检查是否有重复patternName
-    var isOk = checkPatternName(patternName, userId);
+    var isOk = checkPatternName(patternName);
     if (!isOk) {
         return {
             success: false, error: 'pattern name duplicated'
@@ -151,12 +143,12 @@ function addCustomPattern(patternName, patternExp, userId) {
     return {success: true};
 }
 
-function getUserFilterFilePath(userId) {
-    return FILTER_PATH + userId + '.conf';
+function getUserFilterFilePath() {
+    return FILTER_PATH + 'custom.conf';
 }
 
-function getUserPatternFilePath(userId) {
-    return PATTERN_PATH + userId + '/' + CUSTOM_PATTERN_FILE_NAME;
+function getUserPatternFilePath() {
+    return PATTERN_PATH + '1/' + CUSTOM_PATTERN_FILE_NAME;
 }
 
 function getGlobalPatternFilePath() {
@@ -176,13 +168,13 @@ function getPatternNames(filePath) {
     return patternNames;
 }
 
-function checkPatternName(patternName, userId) {
+function checkPatternName(patternName) {
     //获取global pattern name
     var globalPath = getGlobalPatternFilePath();
     var globalPatternNames = getPatternNames(globalPath);
     
     //获取用户已有自定义pattern name
-    var userPath = getUserPatternFilePath(userId);
+    var userPath = getUserPatternFilePath();
     var userPatternNames = getPatternNames(userPath);
    
     var patternNames = globalPatternNames.concat(userPatternNames);

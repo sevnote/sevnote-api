@@ -14,15 +14,9 @@ var express = require('express'),
     Method = path.basename(__filename, '.js');
 
 app.post('/' + Method, base.Connect(),function(req, res) {
-    //Require
-    var userid = req.UserId;
-    if (!userid) {
-        res.json(common.fail(-1, Method, 'Missing parameter: UserId'));
-        return;
-    }
 
     var result = null;
-    result = mysql.get_where_in('snapshot',{'user_id':userid});
+    result = mysql.get('snapshot');
     res.json(common.succeed(Method, {
         SnapshotList: result
     }));

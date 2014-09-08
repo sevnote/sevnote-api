@@ -11,10 +11,10 @@ var express = require('express'),
 
 
 app.post('/'+Method,base.Connect(), function(req, res) {
-   var userid = req.UserId;
    var params = ({
     bytes:'m',
-    index:'user-'+userid+'-*'
+    index:'_all'
+    //index:'user-'+userid+'-*'
    })
    var result = es.catIndices(params);
 

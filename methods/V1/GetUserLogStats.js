@@ -11,13 +11,6 @@ var express = require('express'),
 
 app.post('/' + Method, base.Connect(),function(req, res) {
 
-    //Require
-    var userid = req.UserId;
-    if (!userid) {
-        res.json(common.fail(-1, Method, 'Missing parameter: UserId'));
-        return;
-    }
-
     //Optional
     var from = undefined === req.body.From
                ? new Date('2014-01-01 00:00:00').getTime()
@@ -27,14 +20,14 @@ app.post('/' + Method, base.Connect(),function(req, res) {
              : new Date(req.body.To).getTime();
 
     var esQuery = ejs.BoolQuery();
-    esQuery.must(ejs.QueryStringQuery(userid).defaultField('user_id')); 
     esQuery.must(ejs.RangeQuery('@timestamp').from(from).to(to));
 
     var agg = ejs.FilterAggregation('classcount');
     agg.agg(ejs.TermsAggregation('type').field('_type'));
     agg.filter(ejs.QueryFilter(esQuery));
     var aggparams = {
-        index: 'user-' + userid + '-*',
+        //index: 'user-' + userid + '-*',
+        index: '_all',
         body: ejs.Request().agg(agg),
         size: 0
     }

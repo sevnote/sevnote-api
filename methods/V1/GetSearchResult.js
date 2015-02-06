@@ -16,7 +16,7 @@ app.post('/' + Method, base.Connect(),function(req, res) {
 
     //Require
     var type = req.body.Type;
-    
+	 
     //Optional
     type = undefined === type
            ? 'syslog'
@@ -129,7 +129,7 @@ app.post('/' + Method, base.Connect(),function(req, res) {
             classCount[prop] = countResult[prop].buckets;
         }
     }
-
+   
     res.json(common.succeed(
         Method,
         {

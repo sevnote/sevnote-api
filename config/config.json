@@ -11,7 +11,7 @@
         "mysql":[{
             "server" : "localhost",
             "username": "root",
-            "password": "",
+            "password": "Mm123456",
             "database": "sevnote"
         }],
         "custom_filter_path": "/data/sevnote/logstash/conf.d/",
@@ -29,7 +29,7 @@
         "mysql": [{
             "server": "localhost",
             "username": "root",
-            "password": "",
+            "password": "Mm1234567",
             "database": "sevnote"
         }],
         "custom_filter_path": "/data/sevnote/logstash/conf.d/",

@@ -10,9 +10,9 @@
         }],
         "mysql":[{
             "server" : "localhost",
-            "username": "root",
-            "password": "Mm123456",
-            "database": "sevnote"
+            "username": "usernamne",
+            "password": "password",
+            "database": "database"
         }],
         "custom_filter_path": "/data/sevnote/logstash/conf.d/",
         "logstash_pattern_path": "/data/sevnote/logstash/etc/patterns/"
@@ -28,9 +28,9 @@
         }], 
         "mysql": [{
             "server": "localhost",
-            "username": "root",
-            "password": "Mm1234567",
-            "database": "sevnote"
+            "username": "usernamne",
+            "password": "password",
+            "database": "database"
         }],
         "custom_filter_path": "/data/sevnote/logstash/conf.d/",
         "logstash_pattern_path": "/data/sevnote/logstash/etc/patterns/"
